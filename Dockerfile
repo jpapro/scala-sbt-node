@@ -7,6 +7,20 @@
 # Pull base image
 FROM openjdk:8u212-b04-jdk-stretch
 
+USER root
+
+# add NodeJS
+RUN apt-get install -y curl \
+    && curl -sL https://deb.nodesource.com/setup_8.x | bash - 
+
+# install packages
+RUN apt update \
+    && apt-get install -y nodejs
+
+# install Polymer cli (with web-component-tester) & bower globally, keep gulp for fancy tasks.
+RUN npm install --unsafe-perm -g gulp-cli gulp bower polymer-cli && echo '{ "allow_root": true }' > /root/.bowerrc
+
+
 # Env variables
 ENV SCALA_VERSION 2.12.8
 ENV SBT_VERSION 1.2.8
@@ -16,7 +30,6 @@ RUN \
   curl -L -o sbt-$SBT_VERSION.deb https://dl.bintray.com/sbt/debian/sbt-$SBT_VERSION.deb && \
   dpkg -i sbt-$SBT_VERSION.deb && \
   rm sbt-$SBT_VERSION.deb && \
-  apt-get update && \
   apt-get install sbt
 
 # Add and use user sbtuser
@@ -46,6 +59,11 @@ RUN \
   sbt compile && \
   rm -r project && rm build.sbt && rm Temp.scala && rm -r target
 
+
+
+
+
+
 # Link everything into root as well
 # This allows users of this container to choose, whether they want to run the container as sbtuser (non-root) or as root
 USER root
@@ -53,24 +71,6 @@ RUN \
   echo "export PATH=/home/sbtuser/scala-$SCALA_VERSION/bin:$PATH" >> /root/.bashrc && \
   ln -s /home/sbtuser/.ivy2 /root/.ivy2 && \
   ln -s /home/sbtuser/.sbt /root/.sbt
-
-
-ENV NVM_VERSION 0.33.8
-ENV NODE_VERSION 11.9.0
-
-RUN rm /bin/sh && ln -s /bin/bash /bin/sh
-
-ENV NVM_DIR /usr/local/nvm
-
-# Install nvm with node and npm
-RUN curl https://raw.githubusercontent.com/creationix/nvm/v$NVM_VERSION/install.sh | bash \
-    && . $NVM_DIR/nvm.sh \
-    && nvm install $NODE_VERSION \
-    && nvm alias default $NODE_VERSION \
-    && nvm use default
-
-ENV NODE_PATH $NVM_DIR/v$NODE_VERSION/lib/node_modules
-ENV PATH      $NVM_DIR/v$NODE_VERSION/bin:$PATH
 
 # Switch working directory back to root
 ## Users wanting to use this container as non-root should combine the two following arguments
