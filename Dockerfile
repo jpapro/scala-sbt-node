@@ -8,7 +8,7 @@
 FROM openjdk:8u212-b04-jdk-stretch
 
 # Env variables
-ENV SCALA_VERSION 2.13.0
+ENV SCALA_VERSION 2.12.8
 ENV SBT_VERSION 1.2.8
 
 # Install sbt
@@ -54,8 +54,26 @@ RUN \
   ln -s /home/sbtuser/.ivy2 /root/.ivy2 && \
   ln -s /home/sbtuser/.sbt /root/.sbt
 
+
+ENV NVM_VERSION 0.33.8
+ENV NODE_VERSION 11.9.0
+
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+
+ENV NVM_DIR /usr/local/nvm
+
+# Install nvm with node and npm
+RUN curl https://raw.githubusercontent.com/creationix/nvm/v$NVM_VERSION/install.sh | bash \
+    && . $NVM_DIR/nvm.sh \
+    && nvm install $NODE_VERSION \
+    && nvm alias default $NODE_VERSION \
+    && nvm use default
+
+ENV NODE_PATH $NVM_DIR/v$NODE_VERSION/lib/node_modules
+ENV PATH      $NVM_DIR/v$NODE_VERSION/bin:$PATH
+
 # Switch working directory back to root
 ## Users wanting to use this container as non-root should combine the two following arguments
 ## -u sbtuser
 ## -w /home/sbtuser
-WORKDIR /root  
+WORKDIR /root 
