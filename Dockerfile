@@ -20,6 +20,8 @@ RUN apt-get install -y nodejs
 # install Polymer cli (with web-component-tester) & bower globally, keep gulp for fancy tasks.
 RUN npm install --unsafe-perm -g gulp-cli gulp bower polymer-cli && echo '{ "allow_root": true }' > /root/.bowerrc
 
+# add zip
+RUN apt-get install -y zip
 
 # Env variables
 ENV SCALA_VERSION 2.12.8
@@ -58,9 +60,6 @@ RUN \
   echo "case object Temp" > Temp.scala && \
   sbt compile && \
   rm -r project && rm build.sbt && rm Temp.scala && rm -r target
-
-
-
 
 
 
