@@ -10,12 +10,12 @@ FROM openjdk:8u212-b04-jdk-stretch
 USER root
 
 # add NodeJS
-RUN apt-get install -y curl \
+RUN apt update \
+    && apt-get install -y curl \
     && curl -sL https://deb.nodesource.com/setup_8.x | bash - 
 
 # install packages
-RUN apt update \
-    && apt-get install -y nodejs
+RUN apt-get install -y nodejs
 
 # install Polymer cli (with web-component-tester) & bower globally, keep gulp for fancy tasks.
 RUN npm install --unsafe-perm -g gulp-cli gulp bower polymer-cli && echo '{ "allow_root": true }' > /root/.bowerrc
